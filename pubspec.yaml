@@ -28,6 +28,8 @@ dependencies:
   path_provider: ^1.6.5
   http: any
   test: any
+  rxdart: ^0.23.1
+  
 
 dev_dependencies:
   flutter_test:
