@@ -6,26 +6,24 @@ import 'dart:async';
 import '../models/item_model.dart';
 import './repository.dart';
 
-class NewsDBProvider implements Source, Cache{
+class NewsDBProvider implements Source, Cache {
   Database db;
 
   //not gonna touch
-  Future<List<int>> fetchTopIds(){
+  Future<List<int>> fetchTopIds() {
     return null;
   }
 
-  NewsDBProvider(){
+  NewsDBProvider() {
     init();
   }
 
-  void init() async{
+  void init() async {
     Directory documentDirectory = await getApplicationDocumentsDirectory();
     final path = join(documentDirectory.path, "items.db");
-    db = await openDatabase(
-      path,
-      version: 1,
-      onCreate: (Database newDB, int version){
-        newDB.execute("""
+    db = await openDatabase(path, version: 1,
+        onCreate: (Database newDB, int version) {
+      newDB.execute("""
           CREATE TABLE Items
             (
               id INTEGER PRIMARY KEY,
@@ -43,19 +41,18 @@ class NewsDBProvider implements Source, Cache{
               descendants INTEGER
             )
         """);
-      }
-    );
+    });
   }
 
-  Future<ItemModel> fetchItem(int id) async{
+  Future<ItemModel> fetchItem(int id) async {
     final maps = await db.query(
       "Items",
-      columns : null,
-      where : "id = ?",
-      whereArgs : [id],
+      columns: null,
+      where: "id = ?",
+      whereArgs: [id],
     );
 
-    if(maps.length > 0){
+    if (maps.length > 0) {
       return ItemModel.fromDb(maps.first);
     }
 
@@ -63,9 +60,16 @@ class NewsDBProvider implements Source, Cache{
   }
 
   Future<int> addItem(ItemModel item) {
-    return db.insert("Items", item.toMap());
+    return db.insert(
+      "Items",
+      item.toMap(),
+      conflictAlgorithm: ConflictAlgorithm.ignore,
+    );
   }
 
+  Future<int> clear() {
+    return db.delete('Items');
+  }
 }
 
 final newsDBProvider = NewsDBProvider();
